@@ -1,0 +1,1 @@
+cmd /K "cd C:/Users/Blu/Desktop/Luafix/node/"
