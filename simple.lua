@@ -1,4 +1,4 @@
-a = "cat";
+a = 5;
 b = a * a
 c = {a,a,a}
 d = (#c - 2)
@@ -12,5 +12,5 @@ function fac(n,p)
 	end
 end
 
-if a == 3 or 9 then
+if 3 or 9 == a then
 end

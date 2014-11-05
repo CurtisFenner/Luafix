@@ -38,6 +38,9 @@ function Pretty( expr ) {
 		return "" + expr;
 	}
 	if (expr instanceof Array) {
+		if (expr.length === 0) {
+			return "\n";
+		}
 		var s = "";
 		for (var i = 0; i < expr.length; i++) {
 			s += Pretty(expr[i]) + "\n";
