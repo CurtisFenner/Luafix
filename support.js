@@ -18,6 +18,17 @@ function collapse(arr,into) {
 }
 
 
+function Intersection(a,b) {
+	var c = [];
+	for (var i = 0; i < a.length; i++) {
+		if (b.contains(a[i])) {
+			c.push(a[i]);
+		}
+	}
+	return collapse(c);
+}
+
+
 
 function PrintStack(msg) {
 	console.log( (new Error()).stack );
@@ -26,3 +37,4 @@ function PrintStack(msg) {
 
 exports.collapse = collapse;
 exports.PrintStack = PrintStack;
+exports.Intersection = Intersection;

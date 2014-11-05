@@ -82,6 +82,16 @@ function type(expression, vars, errors) {
 			return "boolean";
 		}
 		if (op === "==" || op === "~=") {
+			var u = S.Intersection(LT,RT);
+			if (u.length == 0) {
+				var msg = "No overlap between types " + LT + " and " + RT +
+				" in comparison. (" + op + " will always be " + 
+				(op == "~=") + ")";
+				errors.push(
+					[msg,
+					expression]
+				);
+			}
 			return "boolean";
 		}
 		if (op === "and" || op === "or") {

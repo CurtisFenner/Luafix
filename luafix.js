@@ -130,10 +130,11 @@ var tree = luaTree("simple.lua");
 
 
 
-function Process(body,vars,level,errs) {
+function ProcessBody(body,vars,level,errs) {
 	vars = vars || {};
 	for (var i = 0; i < body.length; i++) {
 		var s = body[i];
+		console.log(s.type);
 		if (s.type === "FunctionDeclaration") {
 			// Declares an identifier
 			V.vwrite(vars, s.identifier, "function", s.isLocal ? level : 0);
@@ -164,23 +165,28 @@ function Process(body,vars,level,errs) {
 			}
 		}
 		if (s.type === "IfClause") {
-			var cond = T.type(s.condition, vars, errs);
-			if (T.typeCheck(
-					cond,
-					["number","string","table","function","nil"]
-				)) {
-				errs.push(
-					["Condition in clause is always " + cond
-					+ ", always passing condition.",s]
-				);
-			}
 			//
-			Process(s.body,vars,level,errs);
+			ProcessBody(s.body,vars,level,errs);
 		}
-
 		if (s.type === "IfStatement") {
 			for (var j = 0; j < s.clauses.length; j++) {
-				Process(s.clauses[j],vars,level + 1,errs);
+				var cond = T.type(s.clauses[j].condition, vars, errs);
+				if (T.typeCheck(
+						cond,
+						["number","string","table","function"]
+					)) {
+					errs.push(
+						["Condition in clause is always " + cond
+						+ ", always passing condition.",s.clauses[j]]
+					);
+				}
+				if (T.typeCheck(cond,"nil")) {
+					errs.push(
+						["Condition in clause is always " + cond
+						+ ", always failing condition.",s.clauses[j]]
+					);
+				}
+				ProcessBody(s.clauses[j].body,vars,level + 1,errs);
 			}
 		}
 	}
@@ -203,7 +209,7 @@ V.vwrite(vars,"_G","table");
 
 var errs = [];
 
-Process(tree.body,vars,0,errs);
+ProcessBody(tree.body,vars,0,errs);
 
 console.log("");
 F.Heading("ERRORS & WARNINGS");
@@ -212,11 +218,13 @@ F.Heading("ERRORS & WARNINGS");
 
 for (var i = 0; i < errs.length; i++) {
 	F.Center(i+1,"~");
-	console.log("\t",errs[i][0],"in");
-	console.log(F.Tab(F.Pretty(errs[i][1]),2));
+	//console.log("\t",errs[i][0],"in");
+	//console.log(F.Tab(F.Pretty(errs[i][1]),2));
+	F.Show(errs[i][0] + " in");
+	F.Show(F.Pretty(errs[i][1]));
 }
 console.log("");
 F.Line();
 console.log("");
 
-console.log(F.Pretty(tree.body))
+F.Show(F.Pretty(tree.body))
