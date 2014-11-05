@@ -4,8 +4,6 @@ c = {a,a,a}
 d = (#c - 2)
 print(d)
 
-print(math.sin(x));
-
 function fac(n,p)
 	if n == 0 then
 		return p
@@ -14,13 +12,5 @@ function fac(n,p)
 	end
 end
 
-if a == 5 or 3 then
-	print("HI!")
+if a == 3 or 9 then
 end
-
---[[
-	--> p
-	--> fac( (number), (number) )
-]]
-
-fac(0,"cat")

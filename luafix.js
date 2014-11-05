@@ -130,18 +130,17 @@ var tree = luaTree("simple.lua");
 
 
 
-function ProcessBody(body,vars,level,errs) {
+function ProcessBody(body,vars,level,errors) {
 	vars = vars || {};
 	for (var i = 0; i < body.length; i++) {
 		var s = body[i];
-		console.log(s.type);
 		if (s.type === "FunctionDeclaration") {
 			// Declares an identifier
 			V.vwrite(vars, s.identifier, "function", s.isLocal ? level : 0);
 		}
 		if (s.type === "AssignmentStatement") {
 			for (var j = 0; j < s.variables.length; j++) {
-				V.vwrite(vars, s.variables[j], T.type(s.init[j], vars, errs), 0);
+				V.vwrite(vars, s.variables[j], T.type(s.init[j], vars, errors), 0);
 			}
 		}
 		if (s.type === "LocalStatement") {
@@ -149,44 +148,46 @@ function ProcessBody(body,vars,level,errs) {
 				V.vwrite(
 					vars,
 					s.variables[j],
-					T.type(s.init[j], vars, errs),
+					T.type(s.init[j], vars, errors),
 					level
 				);
 			}
 		}
 		if (s.type === "CallStatement") {
-			T.type(s.expression, vars, errs);
+			T.type(s.expression, vars, errors);
 			for (var j = 0; j < s.expression.arguments.length; j++) {
 				T.type(
 					s.expression.arguments[j],
 					vars,
-					errs
+					errors
 				);
 			}
 		}
-		if (s.type === "IfClause") {
-			//
-			ProcessBody(s.body,vars,level,errs);
+		if (s.type === "ReturnStatement") {
+			// TODO
+			for (var i = 0; i < s.arguments.length; i++) {
+				T.type(s.arguments[i], vars, errors);
+			}
 		}
 		if (s.type === "IfStatement") {
 			for (var j = 0; j < s.clauses.length; j++) {
-				var cond = T.type(s.clauses[j].condition, vars, errs);
+				var cond = T.type(s.clauses[j].condition, vars, errors);
 				if (T.typeCheck(
 						cond,
-						["number","string","table","function"]
+						["number","string","table","function","true"]
 					)) {
-					errs.push(
+					errors.push(
 						["Condition in clause is always " + cond
 						+ ", always passing condition.",s.clauses[j]]
 					);
 				}
-				if (T.typeCheck(cond,"nil")) {
-					errs.push(
+				if (T.typeCheck(cond,["nil","false"])) {
+					errors.push(
 						["Condition in clause is always " + cond
 						+ ", always failing condition.",s.clauses[j]]
 					);
 				}
-				ProcessBody(s.clauses[j].body,vars,level + 1,errs);
+				ProcessBody(s.clauses[j].body,vars,level + 1,errors);
 			}
 		}
 	}
@@ -207,21 +208,22 @@ V.vwrite(vars,"coroutine","table");
 V.vwrite(vars,"_G","table");
 //
 
-var errs = [];
+var errors = [];
+errors.typeMemoize = [];
 
-ProcessBody(tree.body,vars,0,errs);
+ProcessBody(tree.body,vars,0,errors);
 
 console.log("");
 F.Heading("ERRORS & WARNINGS");
-F.Center(errs.length + " type errors/warnings reported");
+F.Center(errors.length + " type errors/warnings reported");
 F.Heading("ERRORS & WARNINGS");
 
-for (var i = 0; i < errs.length; i++) {
+for (var i = 0; i < errors.length; i++) {
 	F.Center(i+1,"~");
-	//console.log("\t",errs[i][0],"in");
-	//console.log(F.Tab(F.Pretty(errs[i][1]),2));
-	F.Show(errs[i][0] + " in");
-	F.Show(F.Pretty(errs[i][1]));
+	//console.log("\t",errors[i][0],"in");
+	//console.log(F.Tab(F.Pretty(errors[i][1]),2));
+	F.Show(errors[i][0] + " in");
+	F.Show(F.Pretty(errors[i][1]));
 }
 console.log("");
 F.Line();

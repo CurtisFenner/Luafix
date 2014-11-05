@@ -27,8 +27,19 @@ function concatable(expression) {
 	return typ === "string" || typ === "number";
 }
 
-
 function type(expression, vars, errors) {
+	var M = errors.typeMemoize;
+	for (var i = 0; i < M.length; i++) {
+		if (M[i][0] === expression) {
+			return M[i][1];
+		}
+	}
+	var k = typeunm(expression, vars, errors);
+	M.push([expression, k]);
+	return k;
+}
+
+function typeunm(expression, vars, errors) {
 	if (!errors) {
 		PrintStack("No errors passed to 'type'");
 	}
@@ -94,7 +105,22 @@ function type(expression, vars, errors) {
 			}
 			return "boolean";
 		}
-		if (op === "and" || op === "or") {
+		if (op === "and") {
+			return S.collapse(
+				[
+					type(expression.left,vars,errors),
+					type(expression.right,vars,errors)
+				]
+			);
+		}
+		if (op === "or") {
+			if (typeCheck(LT,"boolean") &&
+				typeCheck(RT,["number","string","function","table","true"])) {
+				errors.push(
+					["Logical or warning: \"" + LT + " or " + RT + "\" is always truthy",
+					expression]
+				);
+			}
 			return S.collapse(
 				[
 					type(expression.left,vars,errors),
