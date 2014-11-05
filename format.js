@@ -65,7 +65,8 @@ function Pretty( expr ) {
 		return k.substring(0,k.length-1) + ")";
 	}
 	if (t === "FunctionDeclaration") {
-		var k = "function " + Pretty(expr.identifer).replace(/[()]/g,"") + "(";
+		var name = Pretty(expr.identifier).replace(/[()]/g,"");
+		var k = "function " + name + "(";
 		for (var i = 0; i < expr.parameters.length; i++) {
 			k += Pretty(expr.parameters[i]) + ", ";
 		}
@@ -73,6 +74,9 @@ function Pretty( expr ) {
 		k += ")\n";
 		k += Tab(Pretty(expr.body),1) + "\n";
 		k += "end";
+		if (expr.isLocal) {
+			k = "local " + k;
+		}
 		return k;
 	}
 	if (t === "CallStatement") {
