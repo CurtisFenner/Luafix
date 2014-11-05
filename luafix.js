@@ -136,7 +136,11 @@ function ProcessBody(body,vars,level,errors) {
 		var s = body[i];
 		if (s.type === "FunctionDeclaration") {
 			// Declares an identifier
+			for (var j = 0; j < s.parameters.length; j++) {
+				V.vwrite(vars, s.parameters[j], "any", level);
+			}
 			V.vwrite(vars, s.identifier, "function", s.isLocal ? level : 0);
+			ProcessBody(s.body, vars,level + 1, errors);
 		}
 		if (s.type === "AssignmentStatement") {
 			for (var j = 0; j < s.variables.length; j++) {
@@ -165,27 +169,30 @@ function ProcessBody(body,vars,level,errors) {
 		}
 		if (s.type === "ReturnStatement") {
 			// TODO
-			for (var i = 0; i < s.arguments.length; i++) {
-				T.type(s.arguments[i], vars, errors);
+			for (var j = 0; j < s.arguments.length; j++) {
+				T.type(s.arguments[j], vars, errors);
 			}
 		}
 		if (s.type === "IfStatement") {
 			for (var j = 0; j < s.clauses.length; j++) {
-				var cond = T.type(s.clauses[j].condition, vars, errors);
-				if (T.typeCheck(
-						cond,
-						["number","string","table","function","true"]
-					)) {
-					errors.push(
-						["Condition in clause is always " + cond
-						+ ", always passing condition.",s.clauses[j]]
-					);
-				}
-				if (T.typeCheck(cond,["nil","false"])) {
-					errors.push(
-						["Condition in clause is always " + cond
-						+ ", always failing condition.",s.clauses[j]]
-					);
+				if (s.clauses[j].condition) {
+					// Else clauses have no condition
+					var cond = T.type(s.clauses[j].condition, vars, errors);
+					if (T.typeCheck(
+							cond,
+							["number","string","table","function","true"]
+						)) {
+						errors.push(
+							["Condition in clause is always " + cond
+							+ ", always passing condition.",s.clauses[j]]
+						);
+					}
+					if (T.typeCheck(cond,["nil","false"])) {
+						errors.push(
+							["Condition in clause is always " + cond
+							+ ", always failing condition.",s.clauses[j]]
+						);
+					}
 				}
 				ProcessBody(s.clauses[j].body,vars,level + 1,errors);
 			}
@@ -220,8 +227,6 @@ F.Heading("ERRORS & WARNINGS");
 
 for (var i = 0; i < errors.length; i++) {
 	F.Center(i+1,"~");
-	//console.log("\t",errors[i][0],"in");
-	//console.log(F.Tab(F.Pretty(errors[i][1]),2));
 	F.Show(errors[i][0] + " in");
 	F.Show(F.Pretty(errors[i][1]));
 }

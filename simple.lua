@@ -12,5 +12,4 @@ function fac(n,p)
 	end
 end
 
-if 3 or 9 == a then
-end
+tern = (a == 3) and b or c;

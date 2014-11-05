@@ -1,11 +1,17 @@
 "use strict";
 
+var FALSY = ["nil","false"];
+var TRUTHY = ["true","function","table","number","string"];
+
 var V = require("./variables.js");
 var S = require("./support.js");
 
 function typeCheck(types, allow) {
 	types = S.collapse(types);
 	allow = S.collapse(allow);
+	if (allow.contains("any")) {
+		return true;
+	}
 	for (var i = 0; i < types.length; i++) {
 		var okay = false;
 		for (var j = 0; j < allow.length; j++) {
@@ -94,7 +100,7 @@ function typeunm(expression, vars, errors) {
 		}
 		if (op === "==" || op === "~=") {
 			var u = S.Intersection(LT,RT);
-			if (u.length == 0) {
+			if (u.length == 0 && !LT.contains("any") && !RT.contains("any")) {
 				var msg = "No overlap between types " + LT + " and " + RT +
 				" in comparison. (" + op + " will always be " + 
 				(op == "~=") + ")";
@@ -106,6 +112,13 @@ function typeunm(expression, vars, errors) {
 			return "boolean";
 		}
 		if (op === "and") {
+			if (typeCheck(LT,FALSY)) {
+				errors.push(
+					["[And short circuiting] " + LT +" is always falsy so " +
+					"right parameter (" + RT + ") is always ignored",
+					expression]
+				);
+			}
 			return S.collapse(
 				[
 					type(expression.left,vars,errors),
@@ -115,9 +128,17 @@ function typeunm(expression, vars, errors) {
 		}
 		if (op === "or") {
 			if (typeCheck(LT,"boolean") &&
-				typeCheck(RT,["number","string","function","table","true"])) {
+				typeCheck(RT, TRUTHY)) {
 				errors.push(
-					["Logical or warning: \"" + LT + " or " + RT + "\" is always truthy",
+					["Logical or warning: \"" + LT + " or " + RT +
+						"\" is always truthy and types don't match",
+					expression]
+				);
+			}
+			if (typeCheck(LT,TRUTHY)) {
+				errors.push(
+					["[Or short circuiting] " + LT +" is always truthy so " +
+					"right parameter (" + RT + ") is always ignored",
 					expression]
 				);
 			}
@@ -161,6 +182,9 @@ function typeunm(expression, vars, errors) {
 				"Cannot call type " + bt + " (requires a function)",
 				expression
 			]);
+		}
+		for (var i = 0; i < expression.arguments.length; i++) {
+			type(expression.arguments[i], vars, errors);
 		}
 		return "any"; //TODO
 	}
