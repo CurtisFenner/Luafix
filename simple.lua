@@ -14,6 +14,10 @@ function fac(n,p)
 	end
 end
 
+if a == 5 or 3 then
+	print("HI!")
+end
+
 --[[
 	--> p
 	--> fac( (number), (number) )

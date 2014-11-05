@@ -179,8 +179,8 @@ function Process(body,vars,level,errs) {
 		}
 
 		if (s.type === "IfStatement") {
-			for (var i = 0; i < s.clauses.length; i++) {
-				Process(clauses[i],vars,level + 1,errs);
+			for (var j = 0; j < s.clauses.length; j++) {
+				Process(s.clauses[j],vars,level + 1,errs);
 			}
 		}
 	}
@@ -204,22 +204,19 @@ V.vwrite(vars,"_G","table");
 var errs = [];
 
 Process(tree.body,vars,0,errs);
-console.log(Array(45).join('\n'));
-console.log("\n\n\n\n\n");
-F.Heading("ERRORS");
-F.Center(errs.length + " type errors reported");
-F.Heading("ERRORS");
+
+console.log("");
+F.Heading("ERRORS & WARNINGS");
+F.Center(errs.length + " type errors/warnings reported");
+F.Heading("ERRORS & WARNINGS");
 
 for (var i = 0; i < errs.length; i++) {
-	console.log("\n");
 	F.Center(i+1,"~");
-	console.log("\t",errs[i][0]);
-	console.log("\t\tin");
+	console.log("\t",errs[i][0],"in");
 	console.log(F.Tab(F.Pretty(errs[i][1]),2));
 }
-
-console.log("\n\n\n");
+console.log("");
 F.Line();
-console.log("\n\n\n");
+console.log("");
 
 console.log(F.Pretty(tree.body))

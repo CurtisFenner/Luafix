@@ -69,13 +69,21 @@ function Pretty( expr ) {
 		for (var i = 0; i < expr.parameters.length; i++) {
 			k += Pretty(expr.parameters[i]) + ", ";
 		}
-		k = k.substring(0,k.length-1);
-		k += ")";
+		k = k.substring(0,k.length-2);
+		k += ")\n";
 		k += Tab(Pretty(expr.body),1) + "\n";
 		k += "end";
+		return k;
 	}
 	if (t === "CallStatement") {
 		return Pretty(expr.expression);
+	}
+	if (t === "IfStatement") {
+		var k = "";
+		for (var i = 0; i < expr.clauses.length; i++) {
+			k += Pretty(expr.clauses[i]);
+		}
+		return k;
 	}
 	return "????";
 }
