@@ -104,9 +104,6 @@ Identifier
 	type: "Identifier"
 
 */
-
-var tree = luaTree("simple.lua");
-
 // Consider the type of any given expression
 // Statements / declarations don't have types, but modify
 // the types of all known identifiers
@@ -130,95 +127,23 @@ var tree = luaTree("simple.lua");
 
 
 
-function ProcessBody(body,vars,level,errors) {
-	vars = vars || {};
-	for (var i = 0; i < body.length; i++) {
-		var s = body[i];
-		if (s.type === "FunctionDeclaration") {
-			// Declares an identifier
-			for (var j = 0; j < s.parameters.length; j++) {
-				V.vwrite(vars, s.parameters[j], "any", level);
-			}
-			V.vwrite(vars, s.identifier, "function", s.isLocal ? level : 0);
-			ProcessBody(s.body, vars,level + 1, errors);
-		}
-		if (s.type === "AssignmentStatement") {
-			for (var j = 0; j < s.variables.length; j++) {
-				V.vwrite(vars, s.variables[j], T.type(s.init[j], vars, errors), 0);
-			}
-		}
-		if (s.type === "LocalStatement") {
-			for (var j = 0; j < s.variables.length; j++) {
-				V.vwrite(
-					vars,
-					s.variables[j],
-					T.type(s.init[j], vars, errors),
-					level
-				);
-			}
-		}
-		if (s.type === "CallStatement") {
-			T.type(s.expression, vars, errors);
-			for (var j = 0; j < s.expression.arguments.length; j++) {
-				T.type(
-					s.expression.arguments[j],
-					vars,
-					errors
-				);
-			}
-		}
-		if (s.type === "ReturnStatement") {
-			// TODO
-			for (var j = 0; j < s.arguments.length; j++) {
-				T.type(s.arguments[j], vars, errors);
-			}
-		}
-		if (s.type === "IfStatement") {
-			for (var j = 0; j < s.clauses.length; j++) {
-				if (s.clauses[j].condition) {
-					// Else clauses have no condition
-					var cond = T.type(s.clauses[j].condition, vars, errors);
-					if (T.typeCheck(
-							cond,
-							["number","string","table","function","true"]
-						)) {
-						errors.push(
-							["Condition in clause is always " + cond
-							+ ", always passing condition.",s.clauses[j]]
-						);
-					}
-					if (T.typeCheck(cond,["nil","false"])) {
-						errors.push(
-							["Condition in clause is always " + cond
-							+ ", always failing condition.",s.clauses[j]]
-						);
-					}
-				}
-				ProcessBody(s.clauses[j].body,vars,level + 1,errors);
-			}
-		}
-	}
-	// Processes a body
+
+var tree = luaTree("simple.lua");
+
+// Jobs:
+// * Tag all identifiers with their declaration (or null if global)
+// * Tag all tree objects with an ID representing their lexical order
+//   (no skips, starting at 1)
+function ProcessChunk(chunk, vars) {
+	// body is a tree object (with a body) not a list.
+	// vars is a list of lists. Onto the list, I push an
+	// empty list and add variables and they are declared locally,
+	// with an identification of which statement produced them.
+
 }
 
 
-//
-// Standard Library
-var vars = [];
-V.vwrite(vars,"print","function");
-V.vwrite(vars,"pack","function");
-V.vwrite(vars,"unpack","function");
-V.vwrite(vars,"math","table");
-V.vwrite(vars,"string","table");
-V.vwrite(vars,"table","table");
-V.vwrite(vars,"coroutine","table");
-V.vwrite(vars,"_G","table");
-//
-
 var errors = [];
-errors.typeMemoize = [];
-
-ProcessBody(tree.body,vars,0,errors);
 
 console.log("");
 F.Heading("ERRORS & WARNINGS");

@@ -1,15 +1,6 @@
-a = 5;
-b = a * a
-c = {a,a,a}
-d = (#c - 2)
-print(d)
+n = 3 * 8
+c = "string"
 
-function fac(n,p)
-	if n == 0 then
-		return p
-	else
-		return fac(n-1,p * n)
-	end
+if n == c then
+	print(n * c)
 end
-
-tern = (a == 3) and b or c;
