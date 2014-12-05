@@ -6,7 +6,7 @@ var T = require("./typecheck.js");
 var V = require("./variables.js");
 var S = require("./support.js");
 var F = require("./format.js");
-var Tag = require("./tag.js");
+var Tag = require("./tag.js").Tag;
 
 Array.prototype.contains = function(obj) {
 	var i = this.length;
@@ -16,7 +16,11 @@ Array.prototype.contains = function(obj) {
 		}
 	}
 	return false;
-}
+};
+
+Array.prototype.peek = function() {
+	return this[this.length-1];
+};
 
 
 
@@ -136,11 +140,7 @@ var tree = luaTree("simple.lua");
 // * Tag all tree objects with an ID representing their lexical order
 //   (no skips, starting at 1)
 
-
-
-var vars = [];
-vars.id = 0;
-ProcessChunk(tree, vars);
+Tag.Tag(tree);
 
 var errors = [];
 
@@ -154,6 +154,7 @@ for (var i = 0; i < errors.length; i++) {
 	F.Show(errors[i][0] + " in");
 	F.Show(F.Pretty(errors[i][1]));
 }
+
 console.log("");
 F.Line();
 console.log("");
