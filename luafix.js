@@ -7,6 +7,7 @@ var V = require("./variables.js");
 var S = require("./support.js");
 var F = require("./format.js");
 var Tag = require("./tag.js").Tag;
+var Type = require("./types.js").Type;
 
 Array.prototype.contains = function(obj) {
 	var i = this.length;
@@ -141,6 +142,7 @@ var tree = luaTree("simple.lua");
 //   (no skips, starting at 1)
 
 Tag.Tag(tree);
+Type.Type(tree);
 
 var errors = [];
 

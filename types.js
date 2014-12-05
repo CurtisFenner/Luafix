@@ -1,11 +1,17 @@
 var nothing = function() { };
 
+// A *type* is an object
+// {types:{}, metas:{}}
+// Where metas point to table declarations...?
+// Types are strings from this list
+// nil, boolean, number, string, table, function, coroutine, any
+
 var Type = {};
 Type.Type = function(obj, vars) {
 	if (!vars) {
-		console.log("Type not passed vars when given", (obj + "").substring(0,200));
+		console.log("Type not passed vars when given",
+			(obj + "").substring(0,200));
 	}
-	vars.parent = obj.parent;
 };
 
 Type.Chunk = function(chunk, vars) {
@@ -19,14 +25,19 @@ Type.Chunk = function(chunk, vars) {
 };
 
 Type._Tuple = function(tuple, vars) {
+	var a = [];
 	for (var i = 0; i < tuple.length; i++) {
-		Type.Type(tuple[i], vars);
+		a[i] = Type.Type(tuple[i], vars);
 	}
+	return a;
 };
 
 Type.AssignmentStatement = function(assign, vars) {
 	Type.Type(assign.variables, vars);
 	Type.Type(assign.init, vars);
+	// Ignore multiple returns (which actual ruins a lot)
+	// TODO
+
 };
 
 Type.NumericLiteral = nothing;
