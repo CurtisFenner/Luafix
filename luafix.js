@@ -6,6 +6,7 @@ var T = require("./typecheck.js");
 var V = require("./variables.js");
 var S = require("./support.js");
 var F = require("./format.js");
+var Tag = require("./tag.js");
 
 Array.prototype.contains = function(obj) {
 	var i = this.length;
@@ -134,14 +135,12 @@ var tree = luaTree("simple.lua");
 // * Tag all identifiers with their declaration (or null if global)
 // * Tag all tree objects with an ID representing their lexical order
 //   (no skips, starting at 1)
-function ProcessChunk(chunk, vars) {
-	// body is a tree object (with a body) not a list.
-	// vars is a list of lists. Onto the list, I push an
-	// empty list and add variables and they are declared locally,
-	// with an identification of which statement produced them.
 
-}
 
+
+var vars = [];
+vars.id = 0;
+ProcessChunk(tree, vars);
 
 var errors = [];
 
