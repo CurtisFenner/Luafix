@@ -49,7 +49,11 @@ function Pretty( expr ) {
 	}
 	var t = expr.type;
 	if (t === "StringLiteral") {
-		return "\"SomeStringLiteral\"";
+		var str = expr.value.replace(/\W+/g,"_");
+		if (str.length > 18) {
+			str = str.substring(0,15) + "...";
+		}
+		return "\"" + str + "\"";
 	}
 	if (expr.value !== undefined) {
 		return expr.value + "";
@@ -111,6 +115,19 @@ function Pretty( expr ) {
 		var k = "return ";
 		for (var i = 0; i < expr.arguments.length; i++) {
 			k += Pretty(expr.arguments[i]) + ", ";
+		}
+		k = k.substring(0,k.length-2);
+		return k;
+	}
+	if (t === "LocalStatement") {
+		var k = "local ";
+		for (var i = 0; i < expr.variables.length; i++) {
+			k += Pretty(expr.variables[i]) + ", ";
+		}
+		k = k.substring(0,k.length-2);
+		k += " = ";
+		for (var i = 0; i < expr.init.length; i++) {
+			k += Pretty(expr.init[i]) + ", " ;
 		}
 		k = k.substring(0,k.length-2);
 		return k;
